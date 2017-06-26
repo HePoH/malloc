@@ -5,7 +5,7 @@ vpath %.h include
 vpath %.o src:lib
 
 CC = gcc
-CFLAGS = -std=c99 -Wall -pedantic -ansi
+CFLAGS = -std=c99 -Wall -pedantic -ansi -g
 LDFLAGS =
 
 #SUBDIRS = lib src
@@ -13,7 +13,7 @@ OBJECTS = main.o
 
 all: $(OBJECTS)  #prepare $(OBJECTS)
                 #clear
-		$(CC) -o malloc $(OBJECTS) $(CFLAGS) $(LDFLAGS) -g
+		$(CC) -o malloc $(OBJECTS) $(CFLAGS) $(LDFLAGS)
 		./malloc
 
 #prepare: $(SUBDIRS)
