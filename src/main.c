@@ -39,7 +39,7 @@ void* my_malloc_hook(size_t size, const void* caller) {
 
 	if (m_curs == mem_tail) {
 		mem_chunk = sbrk(size + sizeof(MEM_CHUNK_STRUCT));
-		result = mem_chunk + 1; /* ??? */
+		result = mem_chunk + 1;
 
 		mem_chunk->size = size;
 		mem_chunk->stat = 1;
@@ -60,10 +60,10 @@ void* my_malloc_hook(size_t size, const void* caller) {
 		}
 	}
 	else {
-		if (free_mem - size >= sizeof(MEM_CHUNK_STRUCT) + 16) {
+  		if (free_mem - size >= sizeof(MEM_CHUNK_STRUCT) + 16) {
 			ptr = (char*) m_curs;
 
-			ptr += size + sizeof(MEM_CHUNK_STRUCT); /* ??? */
+			ptr += size + sizeof(MEM_CHUNK_STRUCT);
 			mem_chunk = (MEM_CHUNK_STRUCT*) ptr;
 
 			mem_chunk->size = free_mem - size - sizeof(MEM_CHUNK_STRUCT);
@@ -80,15 +80,14 @@ void* my_malloc_hook(size_t size, const void* caller) {
 			m_curs->mp_next = mem_chunk;
 		}
 		else {
-
 			m_curs->size = free_mem;
 			m_curs->stat = 1;
 
-			m_curs->mp_next = s_curs->mp_next;
-			s_curs->mp_next->mp_prev = m_curs;
+			m_curs->mp_next = s_curs;
+			s_curs->mp_prev = m_curs;
 		}
 
-		result = ++m_curs; /* ??? */
+		result = ++m_curs;
 	}
 
 	hub = sbrk(0);
@@ -169,69 +168,35 @@ void (*__malloc_initialize_hook)(void) = init;
 
 int main() {
 	int i = 0, j = 0;
-	char ** mem = NULL;
-	char *mem_14 = NULL, *mem_22 = NULL;
+	int ** mem = NULL;
 
-
-	printf("\n[Malloc] mem\n");
-
-	mem = malloc(10 * sizeof(char*));
-	if (mem == NULL)
-		perror("malloc error");
-
-	for (i = 0; i < 10; ++i) {
-		mem[i] = malloc(10 * sizeof(char));
-
-		if (mem[i] == NULL)
-			perror("malloc error");
-
-		for (j = 0; j < 10; ++j)
-			mem[i][j] = (i + 1) * (j + 1);
+	printf("\nMalloc: mem\n");
+	mem = malloc(3 * sizeof(int*));
+	for (i = 0; i < 3; i++) {
+		printf("\nMalloc: mem[%d]\n", i);
+		mem[i] = malloc(10 * sizeof(int));
 	}
 
-	printf("\n");
+	printf("\nFree: mem[1]\n");
+	free(mem[1]);
 
-	/*for (i = 0; i < 10; ++i){
-		printf("[%2.d]: ", i + 1);
+	printf("\nMalloc: mem[1]\n");
+	mem[1] = malloc(5 * sizeof(int));
 
-		for (j = 0; j < 10; ++j)
-			printf("%3.d ", mem[i][j]);
+	printf("\nFree: mem[1]\n");
+	free(mem[1]);
 
-		printf("\n");
-	}*/
+	printf("\nFree: mem[0]\n");
+	free(mem[0]);
 
-	printf("\n[Free] mem[2-7]\n");
-	for (i = 2; i < 7; i++)
-		free(mem[i]);
+	printf("\nFree: mem[2]\n");
+	free(mem[2]);
+
+	printf("\nFree: mem\n");
 	free(mem);
-
-	printf("\n[Malloc] mem_14_22\n");
-	mem_14 = malloc(14 * sizeof(char));
-	mem_22 = malloc(22 * sizeof(char));
-
-	printf("\n[Free] mem[0-2]\n");
-	for (i = 0; i < 2; i++)
-		free(mem[i]);
-
-	printf("\n[Free] mem[7-10]\n");
-	for (i = 7; i < 10; i++)
-
-	free(mem[i]);
-
-	printf("\n[Free] mem\n");
-	free(mem);
-
-	printf("\n[Free] mem_14\n");
-	free(mem_14);
-
-	printf("\n[Free] mem_22\n");
-	free(mem_22);
-
-
-	printf("\n");
 
 	printf("[End] Heap lower bound: %p\n", hlb);
 	printf("[End] Heap upper bound: %p\n\n", hub);
-	/*getchar();*/
+
 	return 0;
 }
